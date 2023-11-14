@@ -14,7 +14,7 @@ from users.models import Subscription, User
 
 
 class DjoserUserViewSet(UserViewSet):
-    """User views."""
+    """User view Set."""
 
     queryset = User.objects.all()
     serializer_class = DjoserUserSerializer
