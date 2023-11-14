@@ -23,7 +23,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-cg6*%6d51ef8f#4!r3*$vmxm4)
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['158.160.80.127', 'localhost', '127.0.0.1', 'foodgramov.sytes.net']
+ALLOWED_HOSTS = '*'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
