@@ -60,5 +60,5 @@ class DjoserUserViewSet(UserViewSet):
             data.delete()
             return Response({'You have unsubscribed from the author'},
                             status=status.HTTP_204_NO_CONTENT)
-        return Response({'Error': 'Invalid data'},
+        return Response({'Invalid data'},
                         status=status.HTTP_400_BAD_REQUEST)
