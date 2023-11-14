@@ -1,8 +1,9 @@
-from recipes.api.serializers import DjoserUserSerializer, RecipeSerializer
-from recipes.models import Favorite, ShoppingCart
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
+
+from recipes.api.serializers import DjoserUserSerializer, RecipeSerializer
+from recipes.models import Favorite, ShoppingCart
 from users.models import Subscription
 
 

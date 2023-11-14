@@ -1,9 +1,8 @@
 """Module for defining API routes."""
-from recipes.api.views import (IngredientsViewSet,
-                               RecipesViewSet,
-                               TagsViewSet)
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
+
+from recipes.api.views import IngredientsViewSet, RecipesViewSet, TagsViewSet
 from users.api.views import DjoserUserViewSet
 
 app_name = 'api'
