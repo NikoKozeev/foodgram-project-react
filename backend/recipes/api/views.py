@@ -1,3 +1,4 @@
+"""This module contains views for recipe-related actions."""
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -52,6 +53,7 @@ class RecipesViewSet(ModelViewSet):
 
     @staticmethod
     def shopping_cart_and_favorite_serialization(serializer, request, pk):
+        """Add or remove a recipe from the shopping cart or favorites."""
         context = {'request': request}
         data = {'user': request.user.id, 'recipe': pk}
         serializer = serializer(data=data, context=context)

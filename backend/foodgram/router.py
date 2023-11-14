@@ -1,3 +1,4 @@
+"""Module for defining API routes."""
 from recipes.api.views import (IngredientsViewSet,
                                RecipesViewSet,
                                TagsViewSet)
@@ -7,6 +8,7 @@ from users.api.views import DjoserUserViewSet
 
 app_name = 'api'
 router = SimpleRouter()
+
 
 router.register('users',
                 DjoserUserViewSet, basename='users')

@@ -1,3 +1,4 @@
+"""Serializers."""
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
@@ -21,6 +22,8 @@ class DjoserUserSerializer(UserSerializer):
                 and obj.following.filter(subscriber=subscriber).exists())
 
     class Meta:
+        """Meta options for DjoserUserSerializer."""
+
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'is_subscribed', 'id')
@@ -30,6 +33,8 @@ class DjoserUserCreateSerializer(UserCreateSerializer):
     """Custom user creation serializer based on Djoser UserCreateSerializer."""
 
     class Meta:
+        """Meta options for DjoserUserCreateSerializer."""
+
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'password', 'id')
@@ -47,6 +52,8 @@ class TagSerializer(serializers.ModelSerializer):
     """Serializer for tags."""
 
     class Meta:
+        """Meta options for TagSerializer."""
+
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
 
@@ -55,6 +62,8 @@ class IngredientSerializer(serializers.ModelSerializer):
     """Serializer for ingredients."""
 
     class Meta:
+        """Meta options for IngredientSerializer."""
+
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
@@ -69,6 +78,8 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Meta options for IngredientInRecipeSerializer."""
+
         model = IngredientInRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
         validators = [
@@ -105,6 +116,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe=obj).exists()
 
     class Meta:
+        """Meta options for RecipeSerializer."""
+
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart', 'name',
@@ -112,11 +125,13 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class IngredientInRecipePostSerializer(serializers.ModelSerializer):
-    """Ingredient serializer for POST requests"""
+    """Serializer for ingredients in a recipe for POST requests."""
 
     id = IntegerField(write_only=True)
 
     class Meta:
+        """Meta options for IngredientInRecipePostSerializer."""
+
         model = IngredientInRecipe
         fields = ('id', 'amount')
 
@@ -131,12 +146,14 @@ class RecipePostSerializer(serializers.ModelSerializer):
     ingredients = IngredientInRecipePostSerializer(many=True)
 
     class Meta:
+        """Meta options for RecipePostSerializer."""
+
         model = Recipe
         fields = ('id', 'author', 'ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time')
 
     def validate(self, attrs):
-        """Validation for creation and modification of recipes."""
+        """Validate creation and modification of recipes."""
         ingredients = self.initial_data.get('ingredients')
         ingredients_list = []
         if not ingredients:
@@ -163,11 +180,13 @@ class RecipePostSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_image(self, image):
+        """Validate that an image is provided."""
         if not image:
             raise serializers.ValidationError({'Image is required'})
         return image
 
     def ingredients_amounts(self, ingredients, recipe):
+        """Create IngredientInRecipe objects for recipe and ingredients."""
         recipe_ingredients = []
         for ingredient_data in ingredients:
             amount = ingredient_data['amount']
@@ -213,5 +232,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     """Serializer for adding a recipe to the shopping cart."""
 
     class Meta:
+        """Meta options for ShoppingCartSerializer."""
+
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
