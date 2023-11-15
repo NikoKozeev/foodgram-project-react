@@ -7,7 +7,7 @@ from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from users.api.serializers import DjoserUserSerializer
+from users.api.serializers import CustomUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -55,7 +55,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
 
-    author = DjoserUserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True)
     tags = TagSerializer(read_only=True, many=True)
     is_favorited = SerializerMethodField(read_only=True)
     is_in_shopping_cart = SerializerMethodField(read_only=True)
@@ -104,7 +104,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
     image = Base64ImageField()
-    author = DjoserUserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True)
     ingredients = IngredientInRecipePostSerializer(many=True)
 
     class Meta:
@@ -190,11 +190,9 @@ class RecipePostSerializer(serializers.ModelSerializer):
                                 context=context).data
 
 
-class ShoppingCartSerializer(serializers.ModelSerializer):
+class GenericRecipeSerializer(serializers.ModelSerializer):
     """Serializer for adding a recipe to the shopping cart."""
 
     class Meta:
-        """Meta options for ShoppingCartSerializer."""
-
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')

@@ -7,7 +7,7 @@ from recipes.models import Favorite, ShoppingCart
 from users.models import Subscription, User
 
 
-class DjoserUserSerializer(UserSerializer):
+class CustomUserSerializer(UserSerializer):
     """Custom user serializer based on Djoser UserSerializer."""
 
     is_subscribed = SerializerMethodField(read_only=True)
@@ -15,23 +15,23 @@ class DjoserUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Get the value indicating if the user is subscribed to the author."""
         subscriber = self.context.get('request').user
+        subscriber = self.context.get('request').user
         return (subscriber.is_authenticated
-                and Subscription.objects.filter(subscriber=subscriber,
-                                                author=obj.id).exists())
+                and obj.author.filter(subscriber=subscriber).exists())
 
     class Meta:
-        """Meta options for DjoserUserSerializer."""
+        """Meta options for CustomUserSerializer."""
 
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'is_subscribed', 'id')
 
 
-class DjoserUserCreateSerializer(UserCreateSerializer):
+class CustomUserCreateSerializer(UserCreateSerializer):
     """Custom user creation serializer based on Djoser UserCreateSerializer."""
 
     class Meta:
-        """Meta options for DjoserUserCreateSerializer."""
+        """Meta options for CustomUserCreateSerializer."""
 
         model = User
         fields = ('username', 'email', 'first_name',
@@ -46,13 +46,13 @@ class DjoserUserCreateSerializer(UserCreateSerializer):
         }
 
 
-class SubscribeUserSerializer(DjoserUserSerializer):
+class SubscribeUserSerializer(CustomUserSerializer):
     """Serializer for user subscriptions."""
 
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
 
-    class Meta(DjoserUserSerializer.Meta):
+    class Meta(CustomUserSerializer.Meta):
         fields = ('username', 'email', 'first_name',
                   'last_name', 'is_subscribed', 'id',
                   'recipes', 'recipes_count')
@@ -60,7 +60,7 @@ class SubscribeUserSerializer(DjoserUserSerializer):
 
     def get_recipes(self, obj):
         """Get the recipes of the author."""
-        from recipes.api.serializers import RecipeSerializer
+        from recipes.api.serializers import GenericRecipeSerializer
         """Import to avoid circular import."""
         recipes = obj.recipes.all()
         request = self.context.get('request')
@@ -70,8 +70,8 @@ class SubscribeUserSerializer(DjoserUserSerializer):
                 recipes = recipes[:int(recipes_limit)]
             except Exception:
                 pass
-        serializer = RecipeSerializer(recipes, many=True,
-                                      read_only=True)
+        serializer = GenericRecipeSerializer(recipes, many=True,
+                                             read_only=True)
         return serializer.data
 
     def get_recipes_count(self, obj):
@@ -121,9 +121,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        from recipes.api.serializers import RecipeSerializer
+        from recipes.api.serializers import GenericRecipeSerializer
         """Import to avoid circular import."""
-        return RecipeSerializer(
+        return GenericRecipeSerializer(
             instance.recipe,
             context=self.context).data
 

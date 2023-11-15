@@ -70,9 +70,9 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
-        'user_create': 'users.api.serializers.DjoserUserCreateSerializer',
-        'user': 'users.api.serializers.DjoserUserSerializer',
-        'current_user': 'users.api.serializers.DjoserUserSerializer',
+        'user_create': 'users.api.serializers.CustomUserCreateSerializer',
+        'user': 'users.api.serializers.CustomUserSerializer',
+        'current_user': 'users.api.serializers.CustomUserSerializer',
     },
 
     'PERMISSIONS': {
@@ -101,17 +101,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', default='django'),
-        'USER': os.getenv('POSTGRES_USER', default='django_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='mysecretpassword'),
-        'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432')
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', default='django'),
+            'USER': os.getenv('POSTGRES_USER', default='django_user'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='mysecretpassword'),
+            'HOST': os.getenv('DB_HOST', default='db'),
+            'PORT': os.getenv('DB_PORT', default='5432')
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [

@@ -7,17 +7,17 @@ from rest_framework.response import Response
 
 from users.api.pagination import UserPagination
 from users.api.permissions import AuthorOrReadOnly
-from users.api.serializers import (DjoserUserSerializer,
+from users.api.serializers import (CustomUserSerializer,
                                    PostSubscribeSerializer,
                                    SubscribeUserSerializer)
 from users.models import Subscription, User
 
 
-class DjoserUserViewSet(UserViewSet):
+class CustomUserViewSet(UserViewSet):
     """User view Set."""
 
     queryset = User.objects.all()
-    serializer_class = DjoserUserSerializer
+    serializer_class = CustomUserSerializer
     pagination_class = UserPagination
     permission_classes = (AuthorOrReadOnly,)
 

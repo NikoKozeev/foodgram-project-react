@@ -3,14 +3,14 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from recipes.api.views import IngredientsViewSet, RecipesViewSet, TagsViewSet
-from users.api.views import DjoserUserViewSet
+from users.api.views import CustomUserViewSet
 
 app_name = 'api'
 router = SimpleRouter()
 
 
 router.register('users',
-                DjoserUserViewSet, basename='users')
+                CustomUserViewSet, basename='users')
 router.register('tags',
                 TagsViewSet, basename='tags')
 router.register('recipes',
