@@ -34,7 +34,7 @@ class DjoserUserViewSet(UserViewSet):
     def subscriptions(self, request):
         """All user subscriptions."""
         page = self.paginate_queryset(User.objects.filter(
-            following__subscriber=request.user))
+            favorites__subscriber=request.user))
         serializer = SubscribeUserSerializer(page, many=True,
                                              context={'request': request})
         return self.get_paginated_response(serializer.data)

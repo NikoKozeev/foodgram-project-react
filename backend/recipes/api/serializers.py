@@ -74,7 +74,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Get whether the recipe is in the shopping cart."""
         user = self.context.get('request').user
-        return user.is_authenticated and user.cart.filter(
+        return user.is_authenticated and user.shopping_cart.filter(
             recipe=obj).exists()
 
     class Meta:
