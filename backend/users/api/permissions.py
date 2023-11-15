@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
-    """Authenticated user or safe method permission class."""
+    """Authenticated user or safe method."""
 
     def has_permission(self, request, view):
         return (
