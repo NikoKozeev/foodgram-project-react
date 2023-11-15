@@ -7,9 +7,9 @@ from recipes.models import Ingredient, Tag
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_LOCATION = os.path.join(BASE_DIR, 'ingredients.csv')
 TAGS_DATA = [
-    {'name': 'First Course', 'slug': 'first', 'color': '#ff6600'},
-    {'name': 'Main Course', 'slug': 'main', 'color': '#ff0000'},
-    {'name': 'Desert', 'slug': 'desert', 'color': '#ff66b2'},
+    {'name': 'Завтрак', 'slug': 'breakfast', 'color': '#ff6600'},
+    {'name': 'Обед', 'slug': 'lunch', 'color': '#ff0000'},
+    {'name': 'Ужин', 'slug': 'dinner', 'color': '#ff66b2'},
 ]
 
 
@@ -23,7 +23,6 @@ def load_ingredients_from_csv(file_path):
 
 
 def fill_tags():
-    """Создает тэги и сохраняет их в базе данных."""
     Tag.objects.bulk_create([Tag(**tag_data) for tag_data in TAGS_DATA])
 
 
