@@ -89,7 +89,7 @@ class PostSubscribeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         author = data.get('author')
         subscriber = data.get('subscriber')
-        if Subscription.objects.filter(author=author).exists():
+        if subscriber.subscriber.filter(author=author).exists():
             raise ValidationError(
                 detail='You cannot subscribe twice',
                 code=status.HTTP_400_BAD_REQUEST,

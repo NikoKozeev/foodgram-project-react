@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -67,6 +68,11 @@ class Subscription(models.Model):
                 name='author_subscriber'
             )
         ]
+
+    def clean(self):
+        if self.subscriber == self.author:
+            raise ValidationError("Нельзя подписаться на самого себя.")
+        return super().clean()
 
     def __str__(self):
         return f"{self.author} {self.subscriber}"
