@@ -4,8 +4,7 @@ from rest_framework.fields import SerializerMethodField
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from recipes.models import Favorite, ShoppingCart
-from users.models import Subscription
-from users.models import User
+from users.models import Subscription, User
 
 
 class DjoserUserSerializer(UserSerializer):
@@ -17,7 +16,8 @@ class DjoserUserSerializer(UserSerializer):
         """Get the value indicating if the user is subscribed to the author."""
         subscriber = self.context.get('request').user
         return (subscriber.is_authenticated
-                and obj.following.filter(subscriber=subscriber).exists())
+                and Subscription.objects.filter(subscriber=subscriber,
+                                                author=obj.id).exists())
 
     class Meta:
         """Meta options for DjoserUserSerializer."""
