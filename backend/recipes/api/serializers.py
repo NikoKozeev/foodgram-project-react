@@ -1,6 +1,5 @@
 """Serializers."""
 from django.shortcuts import get_object_or_404
-from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -8,45 +7,7 @@ from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from users.models import User
-
-
-class DjoserUserSerializer(UserSerializer):
-    """Custom user serializer based on Djoser UserSerializer."""
-
-    is_subscribed = SerializerMethodField(read_only=True)
-
-    def get_is_subscribed(self, obj):
-        """Get the value indicating if the user is subscribed to the author."""
-        subscriber = self.context.get('request').user
-        return (subscriber.is_authenticated
-                and obj.following.filter(subscriber=subscriber).exists())
-
-    class Meta:
-        """Meta options for DjoserUserSerializer."""
-
-        model = User
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'is_subscribed', 'id')
-
-
-class DjoserUserCreateSerializer(UserCreateSerializer):
-    """Custom user creation serializer based on Djoser UserCreateSerializer."""
-
-    class Meta:
-        """Meta options for DjoserUserCreateSerializer."""
-
-        model = User
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'password', 'id')
-
-        extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'password': {'write_only': True},
-            'email': {'required': True},
-            'username': {'required': True},
-        }
+from users.api.serializers import DjoserUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):

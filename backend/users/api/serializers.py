@@ -1,10 +1,49 @@
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
+from djoser.serializers import UserCreateSerializer, UserSerializer
 
-from recipes.api.serializers import DjoserUserSerializer, RecipeSerializer
 from recipes.models import Favorite, ShoppingCart
 from users.models import Subscription
+from users.models import User
+
+
+class DjoserUserSerializer(UserSerializer):
+    """Custom user serializer based on Djoser UserSerializer."""
+
+    is_subscribed = SerializerMethodField(read_only=True)
+
+    def get_is_subscribed(self, obj):
+        """Get the value indicating if the user is subscribed to the author."""
+        subscriber = self.context.get('request').user
+        return (subscriber.is_authenticated
+                and obj.following.filter(subscriber=subscriber).exists())
+
+    class Meta:
+        """Meta options for DjoserUserSerializer."""
+
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'is_subscribed', 'id')
+
+
+class DjoserUserCreateSerializer(UserCreateSerializer):
+    """Custom user creation serializer based on Djoser UserCreateSerializer."""
+
+    class Meta:
+        """Meta options for DjoserUserCreateSerializer."""
+
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'password', 'id')
+
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'password': {'write_only': True},
+            'email': {'required': True},
+            'username': {'required': True},
+        }
 
 
 class SubscribeUserSerializer(DjoserUserSerializer):
@@ -21,6 +60,8 @@ class SubscribeUserSerializer(DjoserUserSerializer):
 
     def get_recipes(self, obj):
         """Get the recipes of the author."""
+        from recipes.api.serializers import RecipeSerializer
+        """Import to avoid circular import."""
         recipes = obj.recipes.all()
         request = self.context.get('request')
         recipes_limit = request.GET.get('recipes_limit')
@@ -80,6 +121,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
+        from recipes.api.serializers import RecipeSerializer
+        """Import to avoid circular import."""
         return RecipeSerializer(
             instance.recipe,
             context=self.context).data
