@@ -56,7 +56,7 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Subscriber',
-        related_name='subsriber'
+        related_name='subscriber'
     )
 
     class Meta:
@@ -71,7 +71,7 @@ class Subscription(models.Model):
 
     def clean(self):
         if self.subscriber == self.author:
-            raise ValidationError("Нельзя подписаться на самого себя.")
+            raise ValidationError("You cant subscribe to yourself.")
         return super().clean()
 
     def __str__(self):
