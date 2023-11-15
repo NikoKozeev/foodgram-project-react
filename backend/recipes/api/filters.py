@@ -12,9 +12,9 @@ class RecipeFilter(FilterSet):
         field_name='tags__slug',
         to_field_name='slug'
     )
-    is_favorited = filters.BooleanFilter(method='filter_is_favorited')
+    is_favorited = filters.BooleanFilter(method='favorited_filter')
     is_in_shopping_cart = filters.BooleanFilter(
-        method='filter_is_in_shopping_cart'
+        method='shopping_cart_filter'
     )
 
     def shopping_cart_filter(self, queryset, name, value):
