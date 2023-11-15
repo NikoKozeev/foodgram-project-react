@@ -51,11 +51,11 @@ class Subscription(models.Model):
         verbose_name='Author',
         related_name='author'
     )
-    follower = models.ForeignKey(
+    subscriber = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Follower',
-        related_name='follower'
+        verbose_name='Subscriber',
+        related_name='subsriber'
     )
 
     class Meta:
@@ -63,10 +63,10 @@ class Subscription(models.Model):
         verbose_name_plural = 'Subscriptions'
         constraints = [
             models.UniqueConstraint(
-                fields=('author', 'follower'),
-                name='author_follower'
+                fields=('author', 'subscriber'),
+                name='author_subscriber'
             )
         ]
 
     def __str__(self):
-        return f"{self.author} {self.follower}"
+        return f"{self.author} {self.subscriber}"

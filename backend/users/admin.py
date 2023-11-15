@@ -19,7 +19,7 @@ class UserAdmin(admin.ModelAdmin):
 class SubscriptionsAdmin(admin.ModelAdmin):
     """Admin for Subscriptions model."""
 
-    list_display = ('id', 'author', 'follower')
-    search_fields = ('author', 'follower')
-    list_filter = ('author', 'follower')
+    list_display = ('id', 'author', 'subscriber')
+    search_fields = ('author', 'subscriber')
+    list_filter = ('author', 'subscriber')
     ordering = ('id',)
