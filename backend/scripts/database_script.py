@@ -13,9 +13,9 @@ TAGS_DATA = [
 ]
 
 
-def import_ingredients_from_csv_file(file_path):
-    with open(file_path, encoding='utf8') as data_file:
-        ingredients = csv.reader(data_file)
+def load_ingredients_from_csv(file_path):
+    with open(file_path, encoding='utf8') as csv_file:
+        ingredients = csv.reader(csv_file)
         for row in ingredients:
             name, measurement_unit = row
             Ingredient.objects.create(name=name,
@@ -28,5 +28,5 @@ def fill_tags():
 
 
 def run():
-    import_ingredients_from_csv_file(DATA_LOCATION)
+    load_ingredients_from_csv(DATA_LOCATION)
     fill_tags()
