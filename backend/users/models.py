@@ -56,7 +56,7 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Subscriber',
-        related_name='subscriber'
+        related_name='follower'
     )
 
     class Meta:
