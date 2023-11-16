@@ -14,7 +14,7 @@ from recipes.api.filters import IngredientFilter, RecipeFilter
 from recipes.api.serializers import (IngredientSerializer,
                                      RecipePostSerializer, RecipeSerializer,
                                      TagSerializer,
-                                     FavoriteSerializer, 
+                                     FavoriteSerializer,
                                      ShoppingCartSerializer)
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingCart, Tag)
