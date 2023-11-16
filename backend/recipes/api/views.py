@@ -123,9 +123,9 @@ class RecipesViewSet(ModelViewSet):
             detail=False)
     def download_shopping_cart(self, request):
         """Download the shopping cart."""
-        if request.user.shoppingcart_set.exists():
+        if request.user.shoppingcart.exists():
             ingredients = IngredientInRecipe.objects\
-                .filter(recipe__shoppingcart_set__user=request.user)\
+                .filter(recipe__shoppingcart__user=request.user)\
                 .values('ingredient__name', 'ingredient__measurement_unit')\
                 .annotate(amount=Sum('amount'))
             return self.get_shopping_cart_txt_response(ingredients)
