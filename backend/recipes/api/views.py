@@ -46,6 +46,7 @@ class RecipesViewSet(ModelViewSet):
         """Select a serializer."""
         if self.request.method in ('POST', 'PATCH',):
             return RecipePostSerializer
+        return RecipePostSerializer
         return RecipeSerializer
 
     @staticmethod

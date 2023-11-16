@@ -85,7 +85,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 class IngredientInRecipePostSerializer(serializers.ModelSerializer):
     """Serializer for ingredients in a recipe for POST requests."""
 
-    id = IntegerField(write_only=True)
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=IngredientInRecipe.objects.all(), write_only=True
+    )
     amount = IntegerField()
 
     class Meta:

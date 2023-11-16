@@ -24,13 +24,13 @@ class RecipeFilter(FilterSet):
     def shopping_cart_filter(self, queryset, name, value):
         """Filter for recipes in the shopping cart."""
         if value and self.request.user.is_authenticated:
-            return queryset.filter(shopping_cart__user=self.request.user)
+            return queryset.filter(shoppingcart_set__user=self.request.user)
         return queryset
 
     def favorited_filter(self, queryset, name, value):
         """Filter for favorited recipes."""
         if value and self.request.user.is_authenticated:
-            return queryset.filter(favorites__user=self.request.user)
+            return queryset.filter(favorite__user=self.request.user)
         return queryset
 
 

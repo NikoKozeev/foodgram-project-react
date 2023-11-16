@@ -33,7 +33,7 @@ class UserViewSet(UserViewSet):
     def subscriptions(self, request):
         """All user subscriptions."""
         page = self.paginate_queryset(User.objects.filter(
-            author__subscriber=request.user))
+            authors__subscriber=request.user))
         serializer = SubscribeUserSerializer(page, many=True,
                                              context={'request': request})
         return self.get_paginated_response(serializer.data)
