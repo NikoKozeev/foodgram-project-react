@@ -9,6 +9,7 @@ from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.api.serializers import UserSerializer
 from utils.get_user_from_context import get_user_from_context
 from recipes.models import Favorite, ShoppingCart
+from utils.api.serializers import GenericRecipeSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -192,14 +193,6 @@ class RecipePostSerializer(serializers.ModelSerializer):
         """Return the created recipe to the user."""
         return RecipeSerializer(instance,
                                 context=self.context).data
-
-
-class GenericRecipeSerializer(serializers.ModelSerializer):
-    """Serializer for adding a recipe to the shopping cart."""
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

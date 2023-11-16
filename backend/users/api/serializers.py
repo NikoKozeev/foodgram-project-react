@@ -4,6 +4,7 @@ from rest_framework.fields import SerializerMethodField
 
 from users.models import Subscription, User
 from utils.get_user_from_context import get_user_from_context
+from utils.api.serializers import GenericRecipeSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -15,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
         """Get the value indicating if the user is subscribed to the author."""
         subscriber = get_user_from_context(self.context)
         return (subscriber.is_authenticated
-                and obj.author.filter(subscriber=subscriber).exists())
+                and obj.authors.filter(subscriber=subscriber).exists())
 
     class Meta:
         """Meta options for UserSerializer."""
@@ -39,8 +40,6 @@ class SubscribeUserSerializer(UserSerializer):
 
     def get_recipes(self, obj):
         """Get the recipes of the author."""
-        from recipes.api.serializers import GenericRecipeSerializer
-        """Import to avoid circular import."""
         recipes = obj.recipes.all()
         request = self.context['request']
         recipes_limit = request.GET.get('recipes_limit')
