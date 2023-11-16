@@ -69,7 +69,7 @@ class Subscription(models.Model):
 
     def clean(self):
         if self.subscriber == self.author:
-            raise ValidationError('You cant subscribe to yourself.')
+            raise ValidationError('You cant subscribe to yourself!')
         return super().clean()
 
     def __str__(self):
