@@ -41,7 +41,7 @@ class IngredientsOfRecipeAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientAdmin(admin.StackedInline):
-    """Ingriedients in Recipe admin."""
+    """Ingriedients in admin Recipe."""
 
     model = IngredientInRecipe
     autocomplete_fields = ('ingredient',)
