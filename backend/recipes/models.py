@@ -1,8 +1,16 @@
 """Module for Django models used in the recipes app."""
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (MinValueValidator,
+                                    RegexValidator,
+                                    MaxValueValidator)
 from django.db import models
 
 from users.models import User
+from constants import (MAX_TAG_NAME,
+                       MAX_LENGTH_COLOR,
+                       MINIMUM_INGREDIENTS,
+                       MAX_COOKING_TIME,
+                       MAX_AMOUNT,
+                       MIN_AMOUNT)
 
 
 class Tag(models.Model):
@@ -10,14 +18,12 @@ class Tag(models.Model):
 
     name = models.CharField(
         verbose_name='Name',
-        max_length=254,
-        blank=False,
+        max_length=MAX_TAG_NAME,
         unique=True,
-        null=False
     )
     color = models.CharField(
-        'Color',
-        max_length=7,
+        verbose_name='Color',
+        max_length=MAX_LENGTH_COLOR,
         unique=True,
         validators=[
             RegexValidator(
@@ -30,10 +36,8 @@ class Tag(models.Model):
     )
     slug = models.SlugField(
         verbose_name='Slug',
-        max_length=254,
-        blank=False,
+        max_length=MAX_TAG_NAME,
         unique=True,
-        null=False
     )
 
     class Meta:
@@ -50,11 +54,11 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         verbose_name='Ingredient Name',
-        max_length=254
+        max_length=MAX_TAG_NAME
     )
     measurement_unit = models.CharField(
         verbose_name='Measurement Unit',
-        max_length=254
+        max_length=MAX_TAG_NAME
     )
 
     class Meta:
@@ -81,13 +85,10 @@ class Recipe(models.Model):
     image = models.ImageField(
         verbose_name='Dish Image',
         upload_to='recipes/',
-        blank=False,
     )
     name = models.CharField(
         verbose_name='Dish Name',
-        max_length=254,
-        blank=False,
-        null=False,
+        max_length=MAX_TAG_NAME,
     )
     tags = models.ManyToManyField(
         Tag,
@@ -96,13 +97,18 @@ class Recipe(models.Model):
     )
     text = models.TextField(
         verbose_name='Recipe Text',
-        max_length=1000,
-        blank=False
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.SmallIntegerField(
         verbose_name='Cooking Time',
         validators=[
-            MinValueValidator(1, message='Value should be at least 1!'),
+            MinValueValidator(
+                MINIMUM_INGREDIENTS,
+                message=f'Value should be at least {MINIMUM_INGREDIENTS}!'
+            ),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                message=f'Value should be less then {MAX_COOKING_TIME}!'
+            ),
         ]
     )
     ingredients = models.ManyToManyField(
@@ -122,7 +128,10 @@ class Recipe(models.Model):
         ordering = ('-date',)
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
+
+    def save():
+        super().save()
 
 
 class IngredientInRecipe(models.Model):
@@ -130,17 +139,28 @@ class IngredientInRecipe(models.Model):
 
     recipe = models.ForeignKey(
         Recipe,
+        verbose_name='Recipe',
         on_delete=models.CASCADE,
         related_name='ingredients_in_recipe',
     )
     ingredient = models.ForeignKey(
         Ingredient,
+        verbose_name='Ingredient',
         on_delete=models.CASCADE,
         related_name='ingredients_in_recipe',
     )
-    amount = models.IntegerField(
+    amount = models.SmallIntegerField(
         verbose_name='Ingriedient Amount',
-        default=1
+        validators=[
+            MinValueValidator(
+                MIN_AMOUNT,
+                message=f'Value should be at least {MIN_AMOUNT}!'
+            ),
+            MaxValueValidator(
+                MAX_AMOUNT,
+                message=f'Value should be less then {MAX_AMOUNT}!'
+            ),
+        ]
     )
 
     class Meta:
@@ -153,21 +173,27 @@ class IngredientInRecipe(models.Model):
         return f'{self.ingredient.name} {self.amount}'
 
 
-class Favorite(models.Model):
-    """Favorite recipes model."""
-
+class AbstractUserXRecipe(models.Model):
     user = models.ForeignKey(
         User,
-        verbose_name='Favorited User',
-        related_name='favorites',
+        verbose_name='User',
         on_delete=models.CASCADE
     )
     recipe = models.ForeignKey(
         Recipe,
-        verbose_name='Favorited Recipes',
-        related_name='favorites',
+        verbose_name='Recipe',
         on_delete=models.CASCADE
     )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f'{self.user} {self.recipe}'
+
+
+class Favorite(AbstractUserXRecipe):
+    """Favorite recipes model."""
 
     class Meta:
         verbose_name = 'Favorite Recipe'
@@ -175,31 +201,12 @@ class Favorite(models.Model):
         constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
                                                name='favorite_recipe')]
 
-    def __str__(self):
-        return f'{self.user} {self.recipe}'
 
-
-class ShoppingCart(models.Model):
+class ShoppingCart(AbstractUserXRecipe):
     """Shopping cart model."""
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Cart Owner',
-        related_name='shopping_cart'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Recipes in Cart',
-        related_name='shopping_cart'
-    )
 
     class Meta:
         verbose_name = 'Item in Shopping Cart'
         verbose_name_plural = 'Items in Shopping Cart'
         constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
                                                name='cart_recipe')]
-
-    def __str__(self):
-        return f'{self.user} {self.recipe}'

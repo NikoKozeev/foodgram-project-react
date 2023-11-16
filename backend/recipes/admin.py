@@ -52,38 +52,32 @@ class RecipeIngredientAdmin(admin.StackedInline):
 class RecipesAdmin(admin.ModelAdmin):
     """Admin for the Recipe model."""
 
-    list_display = ('id', 'author_name', 'name', 'text', 'cooking_time',
-                    'favorite_count', 'image')
+    list_display = ('id', 'author',
+                    'name', 'text', 'cooking_time',
+                    'favorite_count', 'image',
+                    'recipes_tags', 'recipes_ingredients')
     list_filter = ('tags', 'author', 'name')
     search_fields = ('name', 'cooking_time', 'tags__name',
                      'author__email', 'ingredients__name')
     inlines = (RecipeIngredientAdmin,)
 
-    @admin.display(description='author')
-    def author_name(self, obj):
-        """Return the username of the recipe's author."""
-        return obj.author.username
-
     @admin.display(description='tags')
     def recipes_tags(self, obj):
         """Return the tags of the recipe."""
-        result = []
-        for tag in obj.tags.all():
-            result.append(tag.name)
-        return ', '.join(result)
+        return ', '.join((tag.name for tag in obj.tags.all()))
 
     @admin.display(description='ingredients')
     def recipes_ingredients(self, obj):
         """Return the ingredients of the recipe."""
-        result = []
-        for ingredient in obj.ingredients.all():
-            result.append(ingredient.name[0].upper() + ingredient.name[1:])
-        return ', '.join(result)
+        return ', '.join((
+            ingredient.name[0].upper() + ingredient.name[1:]
+            for ingredient in obj.ingredients.all()
+        ))
 
     @admin.display(description='favorite count')
     def favorite_count(self, obj):
         """Return number of times the recipe has been marked as favorite."""
-        return obj.favorites.count()
+        return obj.favorite_set.count()
 
 
 @admin.register(ShoppingCart)

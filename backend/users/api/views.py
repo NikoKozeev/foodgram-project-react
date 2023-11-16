@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -7,17 +6,17 @@ from rest_framework.response import Response
 
 from users.api.pagination import UserPagination
 from users.api.permissions import AuthorOrReadOnly
-from users.api.serializers import (CustomUserSerializer,
+from users.api.serializers import (UserSerializer,
                                    PostSubscribeSerializer,
                                    SubscribeUserSerializer)
 from users.models import Subscription, User
 
 
-class CustomUserViewSet(UserViewSet):
+class UserViewSet(UserViewSet):
     """User view Set."""
 
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = UserSerializer
     pagination_class = UserPagination
     permission_classes = (AuthorOrReadOnly,)
 
@@ -39,21 +38,22 @@ class CustomUserViewSet(UserViewSet):
                                              context={'request': request})
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['post', 'delete'],
+    @action(methods=['post'],
             permission_classes=(IsAuthenticated,),
             detail=True)
     def subscribe(self, request, id):
         """Subscribe to an author."""
-        get_object_or_404(User, id=id)
-        if request.method == 'POST':
-            subscriber = request.user
-            data = {'subscriber': subscriber.id, 'author': id}
-            serializer = PostSubscribeSerializer(data=data,
-                                                 context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        subscriber = request.user
+        data = {'subscriber': subscriber.id, 'author': id}
+        serializer = PostSubscribeSerializer(data=data,
+                                             context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @subscribe.mapping.delete
+    def subscribe_delete(self, request, id):
+        """Unsubscribe from an author."""
         data = Subscription.objects.filter(subscriber_id=request.user.id,
                                            author_id=id)
         if data.exists():

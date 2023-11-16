@@ -3,44 +3,42 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from constants import MAX_LENGTH_NAME, MAX_LENGTH_EMAIL
+
 
 class User(AbstractUser):
     """User model."""
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     username = models.CharField(
         verbose_name='Username',
-        max_length=254,
+        max_length=MAX_LENGTH_NAME,
         unique=True,
         validators=(UnicodeUsernameValidator(), )
     )
     first_name = models.CharField(
         verbose_name='First Name',
-        max_length=254,
+        max_length=MAX_LENGTH_NAME,
     )
     last_name = models.CharField(
         verbose_name='Last Name',
-        max_length=254,
+        max_length=MAX_LENGTH_NAME,
     )
     email = models.EmailField(
         verbose_name='Email',
         unique=True,
-        max_length=254,
-    )
-    password = models.CharField(
-        verbose_name='Password',
-        max_length=254,
+        max_length=MAX_LENGTH_EMAIL,
     )
 
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
-        ordering = ('id',)
+        ordering = ('first_name', 'last_name')
 
     def __str__(self):
-        return f'{self.username}'
+        return self.username
 
 
 class Subscription(models.Model):
@@ -50,13 +48,13 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Author',
-        related_name='author'
+        related_name='authors'
     )
     subscriber = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Subscriber',
-        related_name='follower'
+        related_name='followers'
     )
 
     class Meta:
@@ -71,7 +69,7 @@ class Subscription(models.Model):
 
     def clean(self):
         if self.subscriber == self.author:
-            raise ValidationError("You cant subscribe to yourself.")
+            raise ValidationError('You cant subscribe to yourself.')
         return super().clean()
 
     def __str__(self):

@@ -1,6 +1,6 @@
-"""This module contains views for recipe-related actions."""
+from io import StringIO
 from django.db.models import Sum
-from django.http import HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
@@ -13,12 +13,14 @@ from rest_framework.viewsets import ModelViewSet
 from recipes.api.filters import IngredientFilter, RecipeFilter
 from recipes.api.serializers import (IngredientSerializer,
                                      RecipePostSerializer, RecipeSerializer,
-                                     TagSerializer)
+                                     TagSerializer,
+                                     FavoriteSerializer, 
+                                     ShoppingCartSerializer)
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingCart, Tag)
+
 from users.api.pagination import UserPagination
 from users.api.permissions import AuthorOrReadOnly
-from users.api.serializers import FavoriteSerializer, ShoppingCartSerializer
 
 
 class TagsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -33,7 +35,8 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipesViewSet(ModelViewSet):
     """View for recipes."""
 
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().select_related('author').prefetch_related(
+        'tags', 'ingredients_in_recipe')
     permission_classes = (AuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -41,17 +44,9 @@ class RecipesViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         """Select a serializer."""
-        if self.request.method == 'POST' or self.request.method == 'PATCH':
+        if self.request.method in ('POST', 'PATCH',):
             return RecipePostSerializer
         return RecipeSerializer
-
-    def perform_create(self, serializer):
-        """Create a recipe."""
-        serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
-        """Update a created recipe."""
-        serializer.save(author=self.request.user)
 
     @staticmethod
     def shopping_cart_and_favorite_serialization(serializer, request, pk):
@@ -63,24 +58,25 @@ class RecipesViewSet(ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['post', 'delete'],
+    @action(methods=['post'],
             permission_classes=[IsAuthenticated],
             detail=True,
             )
     def shopping_cart(self, request, pk):
-        """Add/Remove a recipe from the shopping cart."""
-        if request.method == 'POST':
-            return self.shopping_cart_and_favorite_serialization(
-                ShoppingCartSerializer, request, pk)
-        else:
-            data = ShoppingCart.objects.filter(
-                user_id=request.user.id, recipe_id=pk
-            )
-            if data.exists():
-                data.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            get_object_or_404(Recipe, id=pk)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        """Add a recipe from the shopping cart."""
+        return self.shopping_cart_and_favorite_serialization(
+            ShoppingCartSerializer, request, pk)
+
+    @shopping_cart.mapping.delete
+    def shopping_cart_delete(self, request, pk):
+        """Delete a recipe from the shopping cart."""
+        data = ShoppingCart.objects.filter(
+            user_id=request.user.id, recipe_id=pk
+        )
+        if data.exists():
+            data.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['post', 'delete'],
             permission_classes=[IsAuthenticated],
@@ -99,36 +95,40 @@ class RecipesViewSet(ModelViewSet):
         return Response({'Error': 'No such recipe'},
                         status=status.HTTP_400_BAD_REQUEST)
 
+    @staticmethod
+    def get_shopping_cart_txt_response(ingredients):
+        shopping_cart = 'Shopping Cart.\n'
+        list_order = 0
+        for ingredient in ingredients:
+            list_order += 1
+            shopping_cart += (
+                f'{list_order}) '
+                f'{ingredient["ingredient__name"][0].upper()}'
+                f'{ingredient["ingredient__name"][1:]} - '
+                f'{ingredient["ingredient__measurement_unit"]} '
+                f'({ingredient["amount"]})\n'
+            )
+        filename = 'ShoppingCart.txt'
+        response_data = StringIO(shopping_cart)
+        return FileResponse(
+            response_data,
+            as_attachment=True,
+            filename=filename,
+            content_type='text/plain'
+        )
+
     @action(methods=['get'],
             permission_classes=[IsAuthenticated],
             detail=False)
     def download_shopping_cart(self, request):
         """Download the shopping cart."""
-        if request.user.shopping_cart.exists():
-            ingredients_recipe = IngredientInRecipe.objects.filter(
-                recipe__shopping_cart__user=request.user)
-            values = ingredients_recipe.values('ingredient__name',
-                                               'ingredient__measurement_unit')
-            ingredients = values.annotate(amount=Sum('amount'))
+        if request.user.shoppingcart_set.exists():
+            ingredients = IngredientInRecipe.objects\
+                .filter(recipe__shoppingcart_set__user=request.user)\
+                .values('ingredient__name', 'ingredient__measurement_unit')\
+                .annotate(amount=Sum('amount'))
+            return self.get_shopping_cart_txt_response(ingredients)
 
-            shopping_cart = 'Shopping Cart.\n'
-            list_order = 0
-            for ingredient in ingredients:
-                list_order += 1
-                shopping_cart += (
-                    f'{list_order}) '
-                    f'{ingredient["ingredient__name"][0].upper()}'
-                    f'{ingredient["ingredient__name"][1:]} - '
-                    f'{ingredient["ingredient__measurement_unit"]} '
-                    f'({ingredient["amount"]})\n'
-                )
-
-            filename = 'ShoppingCart.txt'
-            response = HttpResponse(shopping_cart,
-                                    content_type='text/plain')
-            response['Content-Disposition'] = (f'attachment; '
-                                               f'filename={filename}')
-            return response
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
