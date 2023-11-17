@@ -14,10 +14,11 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         """Get the value indicating if the user is subscribed to the author."""
         request = self.context.get('request')
-        subscriber = (request.user if request
-                      and not request.user.is_anonymous else None)
-        return (subscriber
-                and obj.authors.filter(subscriber=subscriber).exists())
+        return (
+            request
+            and request.user.is_authenticated
+            and obj.authors.filter(subscriber=request.user).exists()
+        )
 
     class Meta:
         """Meta options for UserSerializer."""

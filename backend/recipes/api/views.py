@@ -76,15 +76,17 @@ class RecipesViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['post', 'delete'],
+    @action(methods=['post'],
             permission_classes=[IsAuthenticated],
             detail=True)
     def favorite(self, request, pk):
-        """Add/Remove favorite recipes."""
-        if request.method == 'POST':
-            return self.shopping_cart_and_favorite_serialization(
-                FavoriteSerializer, request, pk)
+        """Add favorite recipes."""
+        return self.shopping_cart_and_favorite_serialization(
+            FavoriteSerializer, request, pk)
 
+    @shopping_cart.mapping.delete
+    def favorite_delete(self, request, pk):
+        """Delete a recipe from the favorites."""
         data = Favorite.objects.filter(
             user_id=request.user.id, recipe__id=pk
         )
@@ -109,9 +111,8 @@ class RecipesViewSet(ModelViewSet):
                 f'({ingredient["amount"]})\n'
             )
         filename = 'ShoppingCart.txt'
-        response_data = shopping_cart
         return FileResponse(
-            response_data,
+            shopping_cart,
             as_attachment=True,
             filename=filename,
             content_type='text/plain'
@@ -123,12 +124,12 @@ class RecipesViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         """Download the shopping cart."""
         if request.user.shoppingcart_set.exists():
-            ingredients = (IngredientInRecipe.objects
-                           .filter(recipe__shoppingcart__user=request.user)
-                           .values('ingredient__name',
-                                   'ingredient__measurement_unit')
-                           .annotate(amount=Sum('amount'))
-                           )
+            ingredients = IngredientInRecipe.objects.filter(
+                recipe__shoppingcart__user=request.user
+            ).values(
+                'ingredient__name',
+                'ingredient__measurement_unit'
+            ).annotate(amount=Sum('amount'))
             return self.get_shopping_cart_txt_response(ingredients)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
