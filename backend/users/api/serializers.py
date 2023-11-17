@@ -3,8 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 
 from users.models import Subscription, User
-from utils.get_user_from_context import get_user_from_context
-from utils.api.serializers import GenericRecipeSerializer
+from gen_ser.api.serializers import GenericRecipeSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,8 +13,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Get the value indicating if the user is subscribed to the author."""
-        subscriber = get_user_from_context(self.context)
-        return (subscriber.is_authenticated
+        request = self.context.get('request')
+        subscriber = (request.user if request
+                      and not request.user.is_anonymous else None)
+        return (subscriber
                 and obj.authors.filter(subscriber=subscriber).exists())
 
     class Meta:
@@ -46,7 +47,7 @@ class SubscribeUserSerializer(UserSerializer):
         if recipes_limit:
             try:
                 recipes = recipes[:int(recipes_limit)]
-            except IndexError:
+            except ValueError:
                 pass
 
         return GenericRecipeSerializer(recipes, many=True,

@@ -26,11 +26,9 @@ def load_ingredients_from_csv(file_path):
         ingredients = csv.reader(csv_file)
         Ingredient.objects.all().delete()
 
-        for data in (
-            {'name': row[0], 'measurement_unit': row[1]}
-            for row in ingredients
-        ):
-            Ingredient.objects.get_or_create(**data)
+        for name, measurement_unit in ingredients:
+            Ingredient.objects.get_or_create(name=name,
+                                             measurement_unit=measurement_unit)
 
 
 def fill_tags():

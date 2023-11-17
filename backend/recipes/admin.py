@@ -64,15 +64,15 @@ class RecipesAdmin(admin.ModelAdmin):
     @admin.display(description='tags')
     def recipes_tags(self, obj):
         """Return the tags of the recipe."""
-        return ', '.join((tag.name for tag in obj.tags.all()))
+        return ', '.join(tag.name for tag in obj.tags.all())
 
     @admin.display(description='ingredients')
     def recipes_ingredients(self, obj):
         """Return the ingredients of the recipe."""
-        return ', '.join((
+        return ', '.join(
             ingredient.name[0].upper() + ingredient.name[1:]
             for ingredient in obj.ingredients.all()
-        ))
+        )
 
     @admin.display(description='favorite count')
     def favorite_count(self, obj):

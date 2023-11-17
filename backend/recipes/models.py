@@ -98,7 +98,7 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Recipe Text',
     )
-    cooking_time = models.SmallIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Cooking Time',
         validators=[
             MinValueValidator(
@@ -130,9 +130,6 @@ class Recipe(models.Model):
     def __str__(self):
         return self.name
 
-    def save():
-        super().save()
-
 
 class IngredientInRecipe(models.Model):
     """Ingredients in Recipe model."""
@@ -149,7 +146,7 @@ class IngredientInRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredients_in_recipe',
     )
-    amount = models.SmallIntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Ingriedient Amount',
         validators=[
             MinValueValidator(

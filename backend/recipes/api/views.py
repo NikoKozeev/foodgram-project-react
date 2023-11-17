@@ -1,4 +1,5 @@
 from io import StringIO
+
 from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -18,7 +19,6 @@ from recipes.api.serializers import (IngredientSerializer,
                                      ShoppingCartSerializer)
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
                             ShoppingCart, Tag)
-
 from users.api.pagination import UserPagination
 from users.api.permissions import AuthorOrReadOnly
 
@@ -87,7 +87,9 @@ class RecipesViewSet(ModelViewSet):
             return self.shopping_cart_and_favorite_serialization(
                 FavoriteSerializer, request, pk)
 
-        data = Favorite.objects.filter(user=request.user, recipe__id=pk)
+        data = Favorite.objects.filter(
+            user_id=request.user.id, recipe__id=pk
+        )
         if data.exists():
             data.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -123,10 +125,12 @@ class RecipesViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         """Download the shopping cart."""
         if request.user.shoppingcart_set.exists():
-            ingredients = IngredientInRecipe.objects\
-                .filter(recipe__shoppingcart_set__user=request.user)\
-                .values('ingredient__name', 'ingredient__measurement_unit')\
-                .annotate(amount=Sum('amount'))
+            ingredients = (IngredientInRecipe.objects
+                           .filter(recipe__shoppingcart_set__user=request.user)
+                           .values('ingredient__name',
+                                   'ingredient__measurement_unit')
+                           .annotate(amount=Sum('amount'))
+                           )
             return self.get_shopping_cart_txt_response(ingredients)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
