@@ -84,7 +84,7 @@ class RecipesViewSet(ModelViewSet):
         return self.shopping_cart_and_favorite_serialization(
             FavoriteSerializer, request, pk)
 
-    @shopping_cart.mapping.delete
+    @favorite.mapping.delete
     def favorite_delete(self, request, pk):
         """Delete a recipe from the favorites."""
         data = Favorite.objects.filter(
