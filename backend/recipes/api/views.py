@@ -126,7 +126,7 @@ class RecipesViewSet(ModelViewSet):
         """Download the shopping cart."""
         if request.user.shoppingcart_set.exists():
             ingredients = (IngredientInRecipe.objects
-                           .filter(recipe__shoppingcart_set__user=request.user)
+                           .filter(recipe__shoppingcart__user=request.user)
                            .values('ingredient__name',
                                    'ingredient__measurement_unit')
                            .annotate(amount=Sum('amount'))
