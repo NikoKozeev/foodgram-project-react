@@ -32,8 +32,8 @@ def load_ingredients_from_csv(file_path):
 
 
 def fill_tags():
-    Tag.objects.all().delete()
-    Tag.objects.bulk_create([Tag(**tag_data) for tag_data in TAGS_DATA])
+    for tag_data in TAGS_DATA:
+        Tag.objects.get_or_create(slug=tag_data['slug'], defaults=tag_data)
 
 
 def run():
