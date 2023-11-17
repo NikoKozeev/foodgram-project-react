@@ -143,7 +143,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         for ingredient_data in ingredients:
             amount = ingredient_data['amount']
             recipe_ingredient = IngredientInRecipe(
-                ingredient_id=ingredient_data.get('id'),
+                ingredient=ingredient_data.get('id'),
                 recipe=recipe,
                 amount=amount
             )
