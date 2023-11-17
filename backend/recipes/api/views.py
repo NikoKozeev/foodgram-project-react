@@ -1,5 +1,3 @@
-from io import StringIO
-
 from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
@@ -111,7 +109,7 @@ class RecipesViewSet(ModelViewSet):
                 f'({ingredient["amount"]})\n'
             )
         filename = 'ShoppingCart.txt'
-        response_data = StringIO(shopping_cart)
+        response_data = shopping_cart
         return FileResponse(
             response_data,
             as_attachment=True,

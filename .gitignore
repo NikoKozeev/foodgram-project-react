@@ -129,3 +129,7 @@ dmypy.json
 
 # .idea
 .idea
+
+#local stuff
+postman-collection
+.vscode

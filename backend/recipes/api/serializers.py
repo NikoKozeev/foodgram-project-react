@@ -1,4 +1,3 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -8,6 +7,7 @@ from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.api.serializers import UserSerializer
 from recipes.models import Favorite, ShoppingCart
 from gen_ser.api.serializers import GenericRecipeSerializer
+from constants import MAX_AMOUNT, MIN_AMOUNT
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -62,14 +62,20 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'name', 'image', 'text', 'cooking_time')
 
     def get_is_favorited(self, obj):
-        user = self.context.get('request').user
-        return (user.is_authenticated
-                and user.favorite_set.filter(recipe=obj).exists())
+        request = self.context.get('request')
+        return (
+            request and
+            request.user.is_authenticated and
+            request.user.favorite_set.filter(recipe=obj).exists()
+        )
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        return (user.is_authenticated
-                and user.shoppingcart_set.filter(recipe=obj).exists())
+        request = self.context.get('request')
+        return (
+            request and
+            request.user.is_authenticated and
+            request.user.shoppingcart_set.filter(recipe=obj).exists()
+        )
 
 
 class IngredientInRecipePostSerializer(serializers.ModelSerializer):
@@ -79,7 +85,8 @@ class IngredientInRecipePostSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(), write_only=True
     )
     amount = IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(1000)]
+        max_value=MAX_AMOUNT,
+        min_value=MIN_AMOUNT,
     )
 
     class Meta:
